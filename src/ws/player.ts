@@ -1,8 +1,6 @@
-import type { ServerWebSocket } from 'bun';
-import type { GameState } from '../game/GameState';
-import type { Pixel } from '../game/Pixel';
-import type { Player } from '../game/Player';
 import type { CommandName, Target } from '../game/Command';
+import type { MapSerialized } from '../game/GameMap';
+import type { Player } from '../game/Player';
 
 export type PlayerMove = {
   "type": "playerMove",
@@ -15,7 +13,7 @@ export type PlayerTurn = {
   "playerId": string,
   "turnNumber": number,
   "roundNumber": number,
-  "map": Pixel[],
+  "map": MapSerialized,
   "players": Player[],
   "availableCommands": PlayerCommand[]
 }

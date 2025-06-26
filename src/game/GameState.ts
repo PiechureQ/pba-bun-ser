@@ -1,14 +1,13 @@
 import type { Command } from './Command';
-import { Pixel } from './Pixel';
 import { Player } from './Player';
-import { GameMap } from './GameMap';
+import { GameMap, type MapSerialized } from './GameMap';
 import { createEmitter } from './Events';
 import type { GameEventsCallbacks } from './Events';
 
 export class GameState {
   state: 'waiting' | 'playing' = 'waiting';
   private readonly players = new Map<string, Player>();
-  private readonly map = new GameMap(10, 10);
+  private readonly map = new GameMap(40, 40);
 
   private readonly emitter = createEmitter();
   private loop: undefined | NodeJS.Timer = undefined;
@@ -25,15 +24,21 @@ export class GameState {
     this.activePlayer = this.players.keys().next().value;
     this.state = 'playing';
 
+    this.emitter.emit('gameStart', this.serialize());
+
     if (this.loop) clearInterval(this.loop);
     this.loop = setInterval(() => {
       const player = this.players.values().toArray()[this.turnNumber % this.players.size];
       if (player) {
+        this.emitter.emit('turnBegin', { playerId: player.id, state: this.serialize() });
+
         this.activePlayer = player.id;
 
         this.emitter.emit('turnChange', { playerId: player.id, state: this.serialize(), availableCommands: this.getAvailableCommands(player.id) });
 
         this.turnNumber++;
+
+        this.emitter.emit('turnEnd', { playerId: player.id, state: this.serialize() });
       }
       if (this.turnNumber === this.players.size) {
         this.turnNumber = 0;
@@ -45,10 +50,15 @@ export class GameState {
   stop() {
     if (this.loop) clearInterval(this.loop);
     this.state = 'waiting';
+    this.emitter.emit('gameStop', this.serialize());
   }
 
   onTurnChange(cb: GameEventsCallbacks['turnChange']) {
     this.emitter.on('turnChange', cb);
+  }
+
+  onTurnEnd(cb: GameEventsCallbacks['turnEnd']) {
+    this.emitter.on('turnEnd', cb);
   }
 
   addPlayer(): Player {
@@ -61,7 +71,7 @@ export class GameState {
   removePlayer(id: string) {
     const player = this.players.get(id) as Player | undefined;
     if (player) {
-      this.map.removeColor(player?.color);
+      // this.map.removeColor(player?.color);
       this.players.delete(id);
     } else {
       // Player not found
@@ -74,6 +84,7 @@ export class GameState {
 
     if (move.command === 'paint') {
       move.targets.forEach((target) => {
+        if (!target) return;
         const mapPixel = this.map.getPixel(target.x, target.y);
         if (mapPixel)
           mapPixel.color = player.color;
@@ -90,7 +101,7 @@ export class GameState {
       turnNumber: this.turnNumber,
       roundNumber: this.roundNumber,
       players: Array.from(this.players.values()),
-      map: this.map.flatten(),
+      map: this.map.serialize(),
     };
   }
 
@@ -112,5 +123,5 @@ export type GameStateSerialized = {
   roundNumber: number;
   activePlayer: string;
   players: Player[];
-  map: Pixel[];
+  map: MapSerialized;
 };

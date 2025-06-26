@@ -1,5 +1,11 @@
 import { Pixel } from './Pixel';
 
+export type MapSerialized = {
+  pixels: string[];
+  width: number;
+  height: number;
+}
+
 export class GameMap {
   private readonly pixels: Pixel[][]
 
@@ -80,9 +86,19 @@ export class GameMap {
       })
     });
   }
+
+  serialize(): MapSerialized {
+    return {
+      pixels: this.flatten().map(p => p.color),
+      width: this.width,
+      height: this.height,
+    }
+  }
 };
 
 const createMap = (width: number, height: number): Pixel[][] => {
   const pixels = new Array(width).fill(null).map((_, y) => new Array(height).fill(null).map((_, x) => new Pixel(x, y, '#000000')));
   return pixels as Pixel[][];
 }
+
+

@@ -1,6 +1,9 @@
 import { serve } from 'bun';
+import { join } from "path";
+import { readFileSync } from "fs";
 import type { PlayerMove, PlayerTurn, ReceivedMessages } from './ws/player';
 import { GameState } from './game/GameState';
+import type { GameUpdate } from './ws/observer';
 
 type GameServerSettings = {
   /**
@@ -16,6 +19,7 @@ export function gameServer(settings: GameServerSettings) {
     port: 3000,
     fetch(req, server) {
       const url = new URL(req.url);
+
 
       if (url.pathname === '/game-state' && req.method === 'GET') {
         return new Response(JSON.stringify(gameState.serialize()), {
@@ -42,6 +46,16 @@ export function gameServer(settings: GameServerSettings) {
         return new Response(null, { status: 426 });
       }
 
+      if (url.pathname === '/game' && req.method === 'GET') {
+        // Pliki statyczne
+        return handleStaticFile('index.html');
+      }
+
+      if (req.method === 'GET') {
+        // Pliki statyczne
+        return handleStaticFile(url.pathname);
+      }
+
       return new Response('Not Found', { status: 404 });
     },
     websocket: {
@@ -62,7 +76,13 @@ export function gameServer(settings: GameServerSettings) {
           ws.subscribe('join');
           ws.subscribe('playerMove');
         } else if (url.pathname.includes('/observer')) {
-          // setupObserverSocket(ws, gameState);
+          gameState.onTurnEnd(({ playerId, state }) => {
+            ws.send(JSON.stringify({
+              type: 'gameUpdate',
+              playerId,
+              ...state,
+            } as GameUpdate));
+          })
         } else {
           ws.close();
         }
@@ -104,4 +124,26 @@ export function gameServer(settings: GameServerSettings) {
   console.log(`Pixel Bot Arena server running on http://localhost:${server.port}`);
 
   return server;
+}
+
+// Serwowanie plików statycznych
+async function handleStaticFile(pathname: string): Promise<Response> {
+  const path = join(import.meta.dir, "public", pathname);
+
+  try {
+    const file = readFileSync(path);
+    return new Response(file, {
+      headers: { "Content-Type": getContentType(path) }
+    });
+  } catch {
+    return new Response("Not found", { status: 404 });
+  }
+}
+
+// Pomocnicza funkcja do nagłówków Content-Type
+function getContentType(path: string): string {
+  if (path.endsWith(".html")) return "text/html";
+  if (path.endsWith(".css")) return "text/css";
+  if (path.endsWith(".js")) return "text/javascript";
+  return "text/plain";
 }

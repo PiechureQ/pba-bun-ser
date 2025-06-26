@@ -4,6 +4,10 @@ import type { Command } from './Command';
 
 export type GameEvents = {
   turnChange: { playerId: string; state: GameStateSerialized; availableCommands: Command[] };
+  turnBegin: { playerId: string; state: GameStateSerialized; }
+  turnEnd: { playerId: string; state: GameStateSerialized; }
+  gameStart: GameStateSerialized;
+  gameStop: GameStateSerialized;
 }
 
 export type GameEventsCallbacks = {
