@@ -17,7 +17,7 @@ export class GameState {
   private roundNumber = 0;
   private activePlayer: undefined | string = undefined;
 
-  constructor(private readonly turnTime: number) {}
+  constructor(private readonly turnTime: number) { }
 
   async start() {
     this.turnNumber = 0;
@@ -31,7 +31,7 @@ export class GameState {
       if (player) {
         this.activePlayer = player.id;
 
-        this.emitter.emit('turnChange', { playerId: player.id, state: this.serialize(), availableCommands: this.getAviableCommands(player.id) });
+        this.emitter.emit('turnChange', { playerId: player.id, state: this.serialize(), availableCommands: this.getAvailableCommands(player.id) });
 
         this.turnNumber++;
       }
@@ -51,10 +51,11 @@ export class GameState {
     this.emitter.on('turnChange', cb);
   }
 
-  addPlayer() {
+  addPlayer(): Player {
     const player = new Player('Player');
     this.players.set(player.id, player);
-    return player.id;
+    this.map.addPlayer(player.color);
+    return player;
   }
 
   removePlayer(id: string) {
@@ -93,10 +94,10 @@ export class GameState {
     };
   }
 
-  getAviableCommands(playerId: string): Command[] {
+  getAvailableCommands(playerId: string): Command[] {
     const player = this.players.get(playerId);
     if (!player) return [];
-    
+
     //paint
     return [{
       command: 'paint',

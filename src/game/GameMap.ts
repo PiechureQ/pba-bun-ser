@@ -14,6 +14,15 @@ export class GameMap {
     return this.pixels?.[x]?.[y];
   }
 
+  addPlayer(color: string) {
+    const x = Math.floor(Math.random() * this.width);
+    const y = Math.floor(Math.random() * this.height);
+    const startPixel = this.getPixel(x, y);
+    if (startPixel) {
+      startPixel.color = color;
+    }
+  }
+
   getSurroundingPixels(color: string): Pixel[] {
     const height = this.width;
     const width = this.height;
@@ -74,13 +83,6 @@ export class GameMap {
 };
 
 const createMap = (width: number, height: number): Pixel[][] => {
-  const pixels = new Array(width).fill(null).map(() => new Array(height).fill(null));
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-        if (pixels?.[x]?.[y])
-          // @ts-ignore
-          pixels[x][y] = new Pixel(x, y, '#000000');
-      }
-    }
+  const pixels = new Array(width).fill(null).map((_, y) => new Array(height).fill(null).map((_, x) => new Pixel(x, y, '#000000')));
   return pixels as Pixel[][];
 }
