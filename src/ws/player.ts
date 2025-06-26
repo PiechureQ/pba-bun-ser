@@ -22,7 +22,13 @@ export type JoinGame = {
   "type": "join",
 }
 
-export type ReceivedMessages = JoinGame | PlayerMove;
+export type JoinedGame = {
+  "type": "joined",
+  playerId: string,
+  playerColor: string
+}
+
+export type PlayerMessages = JoinGame | PlayerMove | JoinedGame | PlayerTurn;
 
 export type PlayerCommand = {
   "type": CommandName,

@@ -1,5 +1,5 @@
 // Połączenie WebSocket do obserwatora
-const socket = new WebSocket('ws://192.168.10.58:3000/ws/observer'); // Zmień URL na swój serwer
+const socket = new WebSocket('ws://localhost:3000/ws/observer'); // Zmień URL na swój serwer
 
 // Elementy DOM
 const gameStateElement = document.getElementById('game-state');

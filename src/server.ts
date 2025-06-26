@@ -1,7 +1,7 @@
 import { serve } from 'bun';
 import { join } from "path";
 import { readFileSync } from "fs";
-import type { PlayerMove, PlayerTurn, ReceivedMessages } from './ws/player';
+import type { PlayerMove, PlayerTurn, PlayerMessages } from './ws/player';
 import { GameState } from './game/GameState';
 import type { GameUpdate } from './ws/observer';
 
@@ -88,7 +88,7 @@ export function gameServer(settings: GameServerSettings) {
         }
       },
       message(ws, payload) {
-        const message = JSON.parse(payload.toString()) as ReceivedMessages;
+        const message = JSON.parse(payload.toString()) as PlayerMessages;
 
         if (message.type === 'join') {
           ws.publish('join', payload);
