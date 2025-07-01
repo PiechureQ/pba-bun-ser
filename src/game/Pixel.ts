@@ -10,6 +10,6 @@ export class Pixel {
   }
 
   reset() {
-    this.color = '#000000';
+    this.color = '#ffffff';
   }
 };

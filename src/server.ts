@@ -65,13 +65,19 @@ export function gameServer(settings: GameServerSettings) {
         if (url.pathname.includes('/player')) {
           // listen for player turn and send it to the player
           gameState.onTurnChange(({ playerId, state, availableCommands }) => {
-            // console.log(`Sending player turn to ${playerId}`, state, availableCommands);
-            ws.send(JSON.stringify({
-              type: 'playerTurn',
-              playerId,
-              ...state,
-              availableCommands: availableCommands.map(command => ({ type: command.command, availableTargets: command.targets }))
-            } as PlayerTurn));
+            if (availableCommands.length > 0 && availableCommands.some(cmd => cmd.targets.length > 0)) {
+              // console.log(`Sending player turn to ${playerId}`, state, availableCommands);
+              ws.send(JSON.stringify({
+                type: 'playerTurn',
+                playerId,
+                ...state,
+                availableCommands: availableCommands.map(command => ({ type: command.command, availableTargets: command.targets }))
+              } as PlayerTurn));
+            } else {
+              gameState.removePlayer(playerId);
+              ws.close();
+              console.log(`Player ${data.playerId} was removed from map`);
+            }
           })
           ws.subscribe('join');
           ws.subscribe('playerMove');

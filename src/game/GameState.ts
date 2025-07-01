@@ -7,7 +7,8 @@ import type { GameEventsCallbacks } from './Events';
 export class GameState {
   state: 'waiting' | 'playing' = 'waiting';
   private readonly players = new Map<string, Player>();
-  private readonly map = new GameMap(40, 40);
+  // TODO fix when x != y
+  private readonly map = new GameMap(80, 80);
 
   private readonly emitter = createEmitter();
   private loop: undefined | NodeJS.Timer = undefined;
@@ -83,12 +84,11 @@ export class GameState {
     if (!player) return false;
 
     if (move.command === 'paint') {
-      move.targets.forEach((target) => {
-        if (!target) return;
-        const mapPixel = this.map.getPixel(target.x, target.y);
-        if (mapPixel)
-          mapPixel.color = player.color;
-      });
+      const target = move.targets[0];
+      if (!target) return false;
+      const mapPixel = this.map.getPixel(target.x, target.y);
+      if (mapPixel)
+        mapPixel.color = player.color;
     }
 
     return true;

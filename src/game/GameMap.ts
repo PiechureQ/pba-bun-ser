@@ -36,39 +36,42 @@ export class GameMap {
     const seen = new Set<string>();
 
     const directions = [
-      [0, -1], // góra
-      [0, 1],  // dół
-      [-1, 0], // lewo
-      [1, 0],  // prawo
+      [-1, -1], [0, -1], [1, -1], // góra
+      [-1, 0], /* [0, 0], */[1, 0],  // środek
+      [-1, 1], [0, 1], [1, 1], // dół
     ] as const;
 
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const pixel = this.getPixel(y, x);
-        if (pixel && pixel.color !== color) continue;
+    // get all pixels with color
+    const playerPixels = this.flatten().filter(p => p.color === color);
+    // console.log(playerPixels.length, playerPixels)
 
-        for (const [dx, dy] of directions) {
-          const nx = x + dx;
-          const ny = y + dy;
+    // add every neighboring pixel to result without playerPixels
+    playerPixels.forEach(({ x, y }) => {
+      for (const [dx, dy] of directions) {
+        const nx = x + dx;
+        const ny = y + dy;
 
-          if (
-            nx >= 0 &&
-            ny >= 0 &&
-            nx < width &&
-            ny < height
-          ) {
-            const neighbor = this.getPixel(ny, nx);
-            if (neighbor && neighbor.color !== color) {
-              const key = `${nx},${ny}`;
-              if (!seen.has(key)) {
-                seen.add(key);
-                result.push(neighbor);
-              }
+        if (
+          nx >= 0 &&
+          ny >= 0 &&
+          nx < width &&
+          ny < height
+        ) {
+          const neighbor = this.getPixel(nx, ny);
+          if (neighbor && neighbor.color !== color) {
+            const key = `${nx},${ny}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              result.push(neighbor);
             }
           }
         }
       }
-    }
+    })
+    //
+    // console.log(result.map(p => ({ x: p.x, y: p.y })))
+    // if (playerPixels.length === 2)
+    //   throw new Error('Not implemented');
 
     return result;
   }
@@ -97,7 +100,7 @@ export class GameMap {
 };
 
 const createMap = (width: number, height: number): Pixel[][] => {
-  const pixels = new Array(width).fill(null).map((_, y) => new Array(height).fill(null).map((_, x) => new Pixel(x, y, '#000000')));
+  const pixels = new Array(height).fill(null).map((_, x) => new Array(width).fill(null).map((_, y) => new Pixel(x, y, '#ffffff')));
   return pixels as Pixel[][];
 }
 

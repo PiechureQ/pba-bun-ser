@@ -1,8 +1,9 @@
 import type { PlayerMove, PlayerTurn, PlayerMessages } from "../ws/player";
 
-const ws = new WebSocket("ws://localhost:3000/ws/player");
 
 function start() {
+  const ws = new WebSocket("ws://localhost:3000/ws/player");
+
   let playerId = '';
   let color = '';
 
@@ -38,13 +39,17 @@ function start() {
 function handlePlayerTurn(playerId: string, color: string, message: PlayerTurn): PlayerMove | undefined {
   const paintCommand = message.availableCommands.find(cmd => cmd.type === 'paint');
   if (paintCommand && paintCommand.availableTargets.length > 0) {
-    const target = paintCommand.availableTargets[0]; // pierwszy dostępny cel
+    // const target = paintCommand.availableTargets[0]; // pierwszy dostępny cel
+    // randomTarget
+    const randomTarget = paintCommand.availableTargets[Math.floor(Math.random() * paintCommand.availableTargets.length)];
+
+    const target = randomTarget;
 
     if (target) {
       const move: PlayerMove = {
         type: 'playerMove',
         command: 'paint',
-        targets: [target]
+        targets: [randomTarget, target]
       };
 
       console.log(`🖌️ Maluję pole: (${target?.x}, ${target?.y})`);
@@ -55,4 +60,9 @@ function handlePlayerTurn(playerId: string, color: string, message: PlayerTurn):
   }
 }
 
+start();
+start();
+start();
+start();
+start();
 start();
