@@ -23,7 +23,8 @@ function start() {
       console.log(`🧠 Dołączono do gry jako ${playerId} (kolor: ${color})`);
     } else if (message.type === 'playerTurn' && message.playerId === playerId) {
       const response = handlePlayerTurn(playerId, color, message as PlayerTurn);
-      ws.send(JSON.stringify(response));
+      if (response)
+        ws.send(JSON.stringify(response));
     }
   });
 
@@ -37,32 +38,31 @@ function start() {
 }
 
 function handlePlayerTurn(playerId: string, color: string, message: PlayerTurn): PlayerMove | undefined {
-  const paintCommand = message.availableCommands.find(cmd => cmd.type === 'paint');
-  if (paintCommand && paintCommand.availableTargets.length > 0) {
-    // const target = paintCommand.availableTargets[0]; // pierwszy dostępny cel
-    // randomTarget
-    const randomTarget = paintCommand.availableTargets[Math.floor(Math.random() * paintCommand.availableTargets.length)];
+  const availableCommands = message.availableCommands;
 
-    const target = randomTarget;
+  const command = availableCommands[Math.floor(Math.random() * availableCommands.length)]
+  console.log(availableCommands.length, availableCommands.map(cmd => cmd.type))
 
-    if (target) {
-      const move: PlayerMove = {
-        type: 'playerMove',
-        command: 'paint',
-        targets: [randomTarget, target]
-      };
+  if (command) {
+    const randomTarget = command.availableTargets[Math.floor(Math.random() * command.availableTargets.length)];
 
-      console.log(`🖌️ Maluję pole: (${target?.x}, ${target?.y})`);
-      return move;
+    const move: PlayerMove = {
+      type: 'playerMove',
+      command: command.type,
+      targets: randomTarget ? [randomTarget] : []
+    };
+
+    if (randomTarget) {
+      console.log(`🏃 Wykonuję komendę ${command.type} na polu: (${randomTarget.x}, ${randomTarget.y})`);
+    } else {
+      console.log(`🏃 Wykonuję komendę ${command.type}`);
     }
-  } else {
-    console.log('⚠️ Brak dostępnych ruchów');
+    return move;
   }
+
+  console.log('⚠️ Brak dostępnych ruchów');
+  return undefined;
 }
 
-start();
-start();
-start();
-start();
 start();
 start();

@@ -13,7 +13,7 @@ type GameServerSettings = {
 }
 
 export function gameServer(settings: GameServerSettings) {
-  const gameState = new GameState(settings.turnTime);
+  const gameState = new GameState(settings.turnTime, 40, 60);
 
   const server = serve({
     port: 3000,
@@ -74,9 +74,10 @@ export function gameServer(settings: GameServerSettings) {
                 availableCommands: availableCommands.map(command => ({ type: command.command, availableTargets: command.targets }))
               } as PlayerTurn));
             } else {
-              gameState.removePlayer(playerId);
-              ws.close();
-              console.log(`Player ${data.playerId} was removed from map`);
+              // console.log('no commands?')
+              // gameState.removePlayer(playerId);
+              // ws.close();
+              // console.log(`Player ${data.playerId} was removed from map`);
             }
           })
           ws.subscribe('join');
@@ -90,32 +91,37 @@ export function gameServer(settings: GameServerSettings) {
             } as GameUpdate));
           })
         } else {
-          ws.close();
+          // ws.close();
         }
       },
       message(ws, payload) {
-        const message = JSON.parse(payload.toString()) as PlayerMessages;
+        try {
+          const message = JSON.parse(payload.toString()) as PlayerMessages;
 
-        if (message.type === 'join') {
-          ws.publish('join', payload);
-          const player = gameState.addPlayer();
-          (ws.data as { playerId?: string }).playerId = player.id;
-          console.log('Player joined:', player.id, player.color);
-          // Możesz wysłać potwierdzenie do gracza
-          ws.send(JSON.stringify({ type: 'joined', playerId: player.id, playerColor: player.color }));
-        } else if (message.type === 'playerMove') {
-          // console.log('Processing player move:', message);
-          ws.publish('playerMove', payload);
+          if (message.type === 'join') {
+            ws.publish('join', payload);
+            const player = gameState.addPlayer();
+            (ws.data as { playerId?: string }).playerId = player.id;
+            console.log('Player joined:', player.id, player.color);
+            // Możesz wysłać potwierdzenie do gracza
+            ws.send(JSON.stringify({ type: 'joined', playerId: player.id, playerColor: player.color }));
+          } else if (message.type === 'playerMove') {
+            // console.log('Processing player move:', message);
+            ws.publish('playerMove', payload);
 
-          const playerId = (ws.data as { playerId?: string }).playerId;
-          if (!playerId) return
-          const { command, targets } = message;
-          const success = gameState.processPlayerMove(playerId, { command, targets });
+            const playerId = (ws.data as { playerId?: string }).playerId;
+            if (!playerId) return
+            const { command, targets } = message;
+            const success = gameState.processPlayerMove(playerId, { command, targets });
 
-          if (!success) {
-            ws.send(JSON.stringify({ type: 'error', message: 'Invalid move' }));
-          }
-        };
+            if (!success) {
+              ws.send(JSON.stringify({ type: 'error', message: 'Invalid move' }));
+            }
+          };
+        } catch (e) {
+          console.error('Error parsing message:', e);
+          return
+        }
       },
       close(ws) {
         const data = ws.data as { playerId?: string };

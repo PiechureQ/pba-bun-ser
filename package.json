@@ -4,6 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "client": "bun src/client/index.ts",
+    "dev": "bun --watch index.ts",
     "test": "jest"
   },
   "dependencies": {

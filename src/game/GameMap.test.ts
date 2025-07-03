@@ -41,14 +41,33 @@ describe('GameMap', () => {
     });
   });
 
-  describe('getSurroundingPixels', () => {
+  describe('getSurroundingColor', () => {
     it('should return the correct surrounding pixels for a given color', () => {
       gameMap.addPlayer('red');
-      const surroundingPixels = gameMap.getSurroundingPixels('red');
+      const surroundingPixels = gameMap.getSurroundingColor('red');
       expect(surroundingPixels.length).toBeGreaterThan(0);
       surroundingPixels.forEach(pixel => {
         expect(pixel.color).not.toBe('red');
       });
+    });
+  });
+
+  describe('getEnclosedPixels', () => {
+    it('should return the correct enclosed pixels for a given color', () => {
+      const color = 'red';
+      // Create a closed shape with the given color
+      for (let x = 1; x < 9; x++) {
+        gameMap.getPixel(x, 1)!.color = color;
+        gameMap.getPixel(x, 8)!.color = color;
+      }
+      for (let y = 1; y < 9; y++) {
+        gameMap.getPixel(1, y)!.color = color;
+        gameMap.getPixel(8, y)!.color = color;
+      }
+
+      const enclosedPixels = gameMap.getEnclosedPixels(color);
+      // expect(enclosedPixels.length).toBe(49); // (8-1-1) * (9-1-1) = 7 * 7 = 49
+      expect(enclosedPixels.length).toBe(36); // (8-1-1) * (9-1-1) = 7 * 7 = 49
     });
   });
 
