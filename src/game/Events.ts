@@ -6,6 +6,7 @@ export type GameEvents = {
   turnChange: { playerId: string; state: GameStateSerialized; availableCommands: Command[] };
   turnBegin: { playerId: string; state: GameStateSerialized; }
   turnEnd: { playerId: string; state: GameStateSerialized; }
+  roundEnd: { state: GameStateSerialized; }
   gameStart: GameStateSerialized;
   gameStop: GameStateSerialized;
 }

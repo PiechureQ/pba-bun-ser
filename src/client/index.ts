@@ -41,7 +41,6 @@ function handlePlayerTurn(playerId: string, color: string, message: PlayerTurn):
   const availableCommands = message.availableCommands;
 
   const command = availableCommands[Math.floor(Math.random() * availableCommands.length)]
-  console.log(availableCommands.length, availableCommands.map(cmd => cmd.type))
 
   if (command) {
     const randomTarget = command.availableTargets[Math.floor(Math.random() * command.availableTargets.length)];

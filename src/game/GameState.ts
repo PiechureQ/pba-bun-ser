@@ -49,6 +49,7 @@ export class GameState {
     if (this.turnNumber === this.players.size) {
       this.turnNumber = 0;
       this.roundNumber++;
+      this.emitter.emit('roundEnd', { state: this.serialize() });
     }
   }
 
@@ -64,6 +65,10 @@ export class GameState {
 
   onTurnEnd(cb: GameEventsCallbacks['turnEnd']) {
     this.emitter.on('turnEnd', cb);
+  }
+
+  onRoundEnd(cb: GameEventsCallbacks['roundEnd']) {
+    this.emitter.on('roundEnd', cb);
   }
 
   addPlayer(): Player {
@@ -86,7 +91,6 @@ export class GameState {
   processPlayerMove(playerId: string, move: Command): boolean {
     const player = this.players.get(playerId);
     if (!player) return false;
-    console.log('player move', move.command)
 
     const command = move.command;
     const maxTargets = CommandRules[command].maxTargets;
@@ -196,6 +200,7 @@ export class GameState {
       roundNumber: this.roundNumber,
       players: Array.from(this.players.values()),
       map: this.map.serialize(),
+      // mapChanges: this.map.getDiff(this.lastMap),
     };
   }
 
@@ -233,5 +238,6 @@ export type GameStateSerialized = {
   roundNumber: number;
   activePlayer: string;
   players: Player[];
+  // mapChanges: Pixel[],
   map: MapSerialized;
 };

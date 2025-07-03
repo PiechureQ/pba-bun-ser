@@ -83,10 +83,9 @@ export function gameServer(settings: GameServerSettings) {
           ws.subscribe('join');
           ws.subscribe('playerMove');
         } else if (url.pathname.includes('/observer')) {
-          gameState.onTurnEnd(({ playerId, state }) => {
+          gameState.onRoundEnd(({ state }) => {
             ws.send(JSON.stringify({
               type: 'gameUpdate',
-              playerId,
               ...state,
             } as GameUpdate));
           })
