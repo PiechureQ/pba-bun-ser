@@ -65,3 +65,6 @@ function handlePlayerTurn(playerId: string, color: string, message: PlayerTurn):
 
 start();
 start();
+start();
+start();
+start();

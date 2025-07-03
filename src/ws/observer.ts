@@ -6,6 +6,6 @@ export type GameUpdate = {
   "type": "gameUpdate",
   "roundNumber": number,
   "map": MapSerialized,
-  // "mapChanges": Pixel[],
+  "mapChanges": Pixel[],
   "players": Player[],
 }

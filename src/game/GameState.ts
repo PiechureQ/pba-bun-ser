@@ -16,9 +16,11 @@ export class GameState {
   private turnNumber = 0;
   private roundNumber = 0;
   private activePlayer: undefined | string = undefined;
+  private mapChanges: Pixel[];
 
   constructor(private readonly turnTime: number, width: number, height: number) {
     this.map = new GameMap(width, height);
+    this.mapChanges = [];
   }
 
   async start() {
@@ -49,7 +51,8 @@ export class GameState {
     if (this.turnNumber === this.players.size) {
       this.turnNumber = 0;
       this.roundNumber++;
-      this.emitter.emit('roundEnd', { state: this.serialize() });
+      this.emitter.emit('roundEnd', { state: this.serialize(), mapChanges: this.mapChanges });
+      this.mapChanges = [];
     }
   }
 
@@ -104,6 +107,7 @@ export class GameState {
           const mapPixel = this.map.getPixel(target.x, target.y);
           if (!mapPixel) return
           mapPixel.color = player.color;
+          this.mapChanges.push(mapPixel);
           success = true;
         })()
         break;
@@ -113,6 +117,7 @@ export class GameState {
             const mapPixel = this.map.getPixel(target.x, target.y);
             if (!mapPixel) return
             mapPixel.color = player.color;
+            this.mapChanges.push(mapPixel);
           })
           success = true;
         })()
@@ -148,6 +153,7 @@ export class GameState {
             const mapPixel = this.map.getPixel(pixel.x, pixel.y);
             if (mapPixel) {
               mapPixel.color = player.color;
+              this.mapChanges.push(mapPixel);
             }
           })
 
@@ -164,6 +170,7 @@ export class GameState {
             const mapPixel = this.map.getPixel(pixel.x, pixel.y);
             if (mapPixel) {
               mapPixel.color = player.color;
+              this.mapChanges.push(mapPixel);
             }
           })
           success = true;
@@ -179,6 +186,7 @@ export class GameState {
             const mapPixel = this.map.getPixel(pixel.x, pixel.y);
             if (mapPixel) {
               mapPixel.color = player.color;
+              this.mapChanges.push(mapPixel);
             }
           })
           success = true;
@@ -200,7 +208,6 @@ export class GameState {
       roundNumber: this.roundNumber,
       players: Array.from(this.players.values()),
       map: this.map.serialize(),
-      // mapChanges: this.map.getDiff(this.lastMap),
     };
   }
 
@@ -238,6 +245,5 @@ export type GameStateSerialized = {
   roundNumber: number;
   activePlayer: string;
   players: Player[];
-  // mapChanges: Pixel[],
   map: MapSerialized;
 };

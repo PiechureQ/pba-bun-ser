@@ -13,7 +13,7 @@ type GameServerSettings = {
 }
 
 export function gameServer(settings: GameServerSettings) {
-  const gameState = new GameState(settings.turnTime, 40, 60);
+  const gameState = new GameState(settings.turnTime, 60, 80);
 
   const server = serve({
     port: 3000,
@@ -83,9 +83,10 @@ export function gameServer(settings: GameServerSettings) {
           ws.subscribe('join');
           ws.subscribe('playerMove');
         } else if (url.pathname.includes('/observer')) {
-          gameState.onRoundEnd(({ state }) => {
+          gameState.onRoundEnd(({ state, mapChanges }) => {
             ws.send(JSON.stringify({
               type: 'gameUpdate',
+              mapChanges,
               ...state,
             } as GameUpdate));
           })
