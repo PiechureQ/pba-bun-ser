@@ -9,15 +9,28 @@ export type MapSerialized = {
 export class GameMap {
   private readonly pixels: Pixel[][]
 
-  constructor(private readonly width: number, private readonly height: number) {
-    this.pixels = createMap(width, height);
+  static createMap(width: number, height: number): Pixel[][] {
+    const pixels = new Array(height).fill(null).map((_, y) => new Array(width).fill(null).map((_, x) => new Pixel(x, y, '#ffffff')));
+    return pixels as Pixel[][];
+  }
+
+  constructor(private readonly _width: number, private readonly _height: number) {
+    this.pixels = GameMap.createMap(_width, _height);
+  }
+
+  get width(): number {
+    return this._width;
+  }
+
+  get height(): number {
+    return this._height;
   }
 
   getPixel(x: number, y: number): Pixel | undefined {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
       return undefined;
     }
-    return this.pixels?.[x]?.[y];
+    return this.pixels?.[y]?.[x];
   }
 
   addPlayer(color: string) {
@@ -30,8 +43,6 @@ export class GameMap {
   }
 
   getSurroundingPixels(color: string): Pixel[] {
-    const height = this.width;
-    const width = this.height;
     const result: Pixel[] = [];
     const seen = new Set<string>();
 
@@ -54,8 +65,8 @@ export class GameMap {
         if (
           nx >= 0 &&
           ny >= 0 &&
-          nx < width &&
-          ny < height
+          nx < this.width &&
+          ny < this.height
         ) {
           const neighbor = this.getPixel(nx, ny);
           if (neighbor && neighbor.color !== color) {
@@ -98,10 +109,3 @@ export class GameMap {
     }
   }
 };
-
-const createMap = (width: number, height: number): Pixel[][] => {
-  const pixels = new Array(height).fill(null).map((_, x) => new Array(width).fill(null).map((_, y) => new Pixel(x, y, '#ffffff')));
-  return pixels as Pixel[][];
-}
-
-

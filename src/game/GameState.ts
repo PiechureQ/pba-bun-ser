@@ -7,7 +7,6 @@ import type { GameEventsCallbacks } from './Events';
 export class GameState {
   state: 'waiting' | 'playing' = 'waiting';
   private readonly players = new Map<string, Player>();
-  // TODO fix when x != y
   private readonly map = new GameMap(80, 80);
 
   private readonly emitter = createEmitter();
