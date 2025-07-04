@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "client": "bun src/client/index.ts",
+    "client": "bun scripts/client.ts",
     "dev": "bun --watch index.ts",
     "test": "jest"
   },

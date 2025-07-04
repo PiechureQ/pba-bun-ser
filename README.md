@@ -1,4 +1,4 @@
-# server-ts
+# pba server
 
 To install dependencies:
 

@@ -68,7 +68,7 @@ describe('GameState', () => {
       expect(result).toBe(true);
     });
 
-    it.only('should process a "bomb" command', () => {
+    it('should process a "bomb" command', () => {
       const move = {
         command: 'bomb' as const,
         targets: [{ x: 5, y: 5 }],
