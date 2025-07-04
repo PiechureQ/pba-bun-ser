@@ -2,27 +2,39 @@ import { GameState } from "../game/GameState";
 import { join } from "path";
 import { readFileSync } from "fs";
 
+// Definiujemy nagłówki CORS w jednym miejscu
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*', // Pozwala na żądania z dowolnego źródła
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', // Definiuje dozwolone metody
+  'Access-Control-Allow-Headers': 'Content-Type', // Definiuje dozwolone nagłówki
+};
+
 export function createFetch(gameState: GameState) {
   return function fetch(req: Request, server: Bun.Server) {
     const url = new URL(req.url);
 
+    // Obsługa zapytań OPTIONS (pre-flight) dla CORS
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { headers: corsHeaders });
+    }
+
     if (url.pathname === '/game-state' && req.method === 'GET') {
       return new Response(JSON.stringify(gameState.serialize()), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     if (url.pathname === '/start' && req.method === 'GET') {
       gameState.start();
       return new Response(JSON.stringify(gameState.serialize()), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     if (url.pathname === '/stop' && req.method === 'GET') {
       gameState.stop();
-      return new Response('ok', {
-        headers: { 'Content-Type': 'application/json' },
+      return new Response(JSON.stringify(gameState.serialize()), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -52,7 +64,7 @@ async function handleStaticFile(pathname: string): Promise<Response> {
   try {
     const file = readFileSync(path);
     return new Response(file, {
-      headers: { "Content-Type": getContentType(path) }
+      headers: { ...corsHeaders, "Content-Type": getContentType(path) }
     });
   } catch {
     return new Response("Not found", { status: 404 });

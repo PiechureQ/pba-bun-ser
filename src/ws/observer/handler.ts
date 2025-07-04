@@ -17,4 +17,3 @@ export class ObserverHandler implements SocketHandlerInterface {
   onClose(ws: Bun.ServerWebSocket<WebSocketData>, gameState: GameState): void {
   }
 }
-

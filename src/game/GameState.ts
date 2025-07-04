@@ -203,8 +203,6 @@ export class GameState {
   serialize(): GameStateSerialized {
     return {
       state: this.state,
-      activePlayer: this.activePlayer || '',
-      turnNumber: this.turnNumber,
       roundNumber: this.roundNumber,
       players: Array.from(this.players.values()),
       map: this.map.serialize(),
@@ -241,9 +239,7 @@ export class GameState {
 
 export type GameStateSerialized = {
   state: 'waiting' | 'playing';
-  turnNumber: number;
   roundNumber: number;
-  activePlayer: string;
   players: Player[];
   map: MapSerialized;
 };

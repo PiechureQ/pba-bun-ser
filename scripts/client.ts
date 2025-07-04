@@ -1,4 +1,4 @@
-import type { PlayerMove, PlayerTurn, PlayerMessages } from "../ws/player";
+import type { PlayerIn, PlayerOut } from "../src/ws/player/message";
 
 
 function start() {
@@ -15,14 +15,14 @@ function start() {
 
   // message is received
   ws.addEventListener("message", event => {
-    const message = JSON.parse(event.data) as PlayerMessages;
+    const message = JSON.parse(event.data) as PlayerOut.Messages;
     if (message.type === 'joined') {
       console.log('message', message, typeof message)
       playerId = message.playerId;
       color = message.playerColor;
       console.log(`🧠 Dołączono do gry jako ${playerId} (kolor: ${color})`);
-    } else if (message.type === 'playerTurn' && message.playerId === playerId) {
-      const response = handlePlayerTurn(playerId, color, message as PlayerTurn);
+    } else if (message.type === 'playerTurn') {
+      const response = handlePlayerTurn(message as PlayerOut.PlayerTurn);
       if (response)
         ws.send(JSON.stringify(response));
     }
@@ -37,7 +37,7 @@ function start() {
   ws.addEventListener("error", event => { });
 }
 
-function handlePlayerTurn(playerId: string, color: string, message: PlayerTurn): PlayerMove | undefined {
+function handlePlayerTurn(message: PlayerOut.PlayerTurn): PlayerIn.PlayerMove | undefined {
   const availableCommands = message.availableCommands;
 
   const command = availableCommands[Math.floor(Math.random() * availableCommands.length)]
@@ -45,7 +45,7 @@ function handlePlayerTurn(playerId: string, color: string, message: PlayerTurn):
   if (command) {
     const randomTarget = command.availableTargets[Math.floor(Math.random() * command.availableTargets.length)];
 
-    const move: PlayerMove = {
+    const move: PlayerIn.PlayerMove = {
       type: 'playerMove',
       command: command.type,
       targets: randomTarget ? [randomTarget] : []
