@@ -8,10 +8,12 @@ type GameServerSettings = {
    * ms time of one turn
    */
   turnTime: number;
+  width: number;
+  height: number;
 }
 
 export function gameServer(settings: GameServerSettings) {
-  const gameState = new GameState(settings.turnTime, 60, 80);
+  const gameState = new GameState(settings.turnTime, settings.width, settings.height);
 
   const server = serve({
     port: 3000,

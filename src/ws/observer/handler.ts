@@ -12,7 +12,7 @@ export class ObserverHandler implements SocketHandlerInterface {
       }));
     })
   }
-  onMessage(ws: Bun.ServerWebSocket<WebSocketData>, gameState: GameState): void {
+  onMessage(ws: Bun.ServerWebSocket<WebSocketData>, gameState: GameState, _payload: unknown): void {
   }
   onClose(ws: Bun.ServerWebSocket<WebSocketData>, gameState: GameState): void {
   }
