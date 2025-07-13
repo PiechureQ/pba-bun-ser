@@ -37,6 +37,8 @@ export class GameState {
   }
 
   onLoop() {
+    if (this.players.size < 1) return
+
     const player = this.players.values().toArray()[this.turnNumber % this.players.size];
     if (player) {
       this.emitter.emit('turnBegin', { playerId: player.id, state: this.serialize() });
@@ -78,7 +80,7 @@ export class GameState {
   addPlayer(): Player {
     const player = new Player('Player');
     this.players.set(player.id, player);
-    this.map.addPlayer(player.color);
+    // this.map.addPlayer(player.color);
     return player;
   }
 

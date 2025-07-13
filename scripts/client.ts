@@ -43,19 +43,19 @@ function handlePlayerTurn(message: PlayerOut.PlayerTurn): PlayerIn.PlayerMove | 
   const command = availableCommands[Math.floor(Math.random() * availableCommands.length)]
 
   if (command) {
-    const randomTarget = command.availableTargets[Math.floor(Math.random() * command.availableTargets.length)];
+    const randomTarget = { x: Math.floor(Math.random() * 36), y: Math.floor(Math.random() * 24) };
 
     const move: PlayerIn.PlayerMove = {
       type: 'playerMove',
       command: command.type,
-      targets: randomTarget ? [randomTarget] : []
+      targets: [randomTarget]
     };
 
-    if (randomTarget) {
-      console.log(`🏃 Wykonuję komendę ${command.type} na polu: (${randomTarget.x}, ${randomTarget.y})`);
-    } else {
-      console.log(`🏃 Wykonuję komendę ${command.type}`);
-    }
+    // if (randomTarget) {
+    //   console.log(`🏃 Wykonuję komendę ${command.type} na polu: (${randomTarget.x}, ${randomTarget.y})`);
+    // } else {
+    console.log(`🏃 Wykonuję komendę ${command.type}`);
+    // }
     return move;
   }
 

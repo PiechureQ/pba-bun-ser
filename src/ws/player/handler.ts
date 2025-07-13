@@ -17,11 +17,13 @@ export class PlayerHandler implements SocketHandlerInterface {
     })
 
     gameState.onRoundEnd(({ state, mapChanges }) => {
-      ws.send(PlayerOut.stringify({
-        type: 'gameUpdate',
-        round: state.roundNumber,
-        mapChanges,
-      }))
+      if (mapChanges.length > 0) {
+        ws.send(PlayerOut.stringify({
+          type: 'gameUpdate',
+          round: state.roundNumber,
+          mapChanges,
+        }))
+      }
     })
   }
 
