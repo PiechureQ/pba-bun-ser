@@ -1,4 +1,4 @@
-import { CommandRules, type Command } from './Command';
+import { CommandRules, Target, type Command } from './Command';
 import { Player } from './Player';
 import { GameMap, type MapSerialized } from './GameMap';
 import { createEmitter } from './Events';
@@ -23,7 +23,7 @@ export class GameState {
     this.mapChanges = [];
   }
 
-  async start() {
+  async start(opts?: { _noLoop?: boolean }) {
     this.turnNumber = 0;
     this.roundNumber = 0;
     this.activePlayer = this.players.keys().next().value;
@@ -31,6 +31,7 @@ export class GameState {
 
     this.emitter.emit('gameStart', this.serialize());
 
+    if (opts?._noLoop) return;
     if (this.loop) clearInterval(this.loop);
     this.loop = setInterval(this.onLoop.bind(this), this.turnTime);
   }
@@ -91,34 +92,28 @@ export class GameState {
     }
   }
 
-  processPlayerMove(playerId: string, move: Command): boolean {
+  processPlayerMove(playerId: string, move: Command): { status: boolean; message: undefined | string; affected: Pixel[] } {
+    const affected: Pixel[] = []
+    let success = false;
+    let message: undefined | string = undefined;
+
     const player = this.players.get(playerId);
-    if (!player) return false;
+    if (!player) return { status: false, affected };
 
     const command = move.command;
     const maxTargets = CommandRules[command].maxTargets;
 
-    let success = false;
+    if (!player.canUseCommand(command, this.roundNumber)) return { status: false, affected };
+
     switch (command) {
       case 'paint':
-        (() => {
+        message = (() => {
           const target = move.targets[0];
-          if (!target) return;
+          if (!target) return 'no valid target';
           const mapPixel = this.map.getPixel(target.x, target.y);
-          if (!mapPixel) return
+          if (!mapPixel) return 'target is not on map';
           mapPixel.color = player.color;
-          this.mapChanges.push(mapPixel);
-          success = true;
-        })()
-        break;
-      case 'splat':
-        (() => {
-          move.targets.splice(0, maxTargets).forEach(target => {
-            const mapPixel = this.map.getPixel(target.x, target.y);
-            if (!mapPixel) return
-            mapPixel.color = player.color;
-            this.mapChanges.push(mapPixel);
-          })
+          affected.push(mapPixel);
           success = true;
         })()
         break;
@@ -153,7 +148,7 @@ export class GameState {
             const mapPixel = this.map.getPixel(pixel.x, pixel.y);
             if (mapPixel) {
               mapPixel.color = player.color;
-              this.mapChanges.push(mapPixel);
+              affected.push(mapPixel);
             }
           })
 
@@ -170,7 +165,7 @@ export class GameState {
             const mapPixel = this.map.getPixel(pixel.x, pixel.y);
             if (mapPixel) {
               mapPixel.color = player.color;
-              this.mapChanges.push(mapPixel);
+              affected.push(mapPixel);
             }
           })
           success = true;
@@ -186,7 +181,7 @@ export class GameState {
             const mapPixel = this.map.getPixel(pixel.x, pixel.y);
             if (mapPixel) {
               mapPixel.color = player.color;
-              this.mapChanges.push(mapPixel);
+              affected.push(mapPixel);
             }
           })
           success = true;
@@ -196,8 +191,11 @@ export class GameState {
         break;
     }
 
-    if (success) player.setCommandUsed(command, this.turnNumber);
-    return success
+    if (success) {
+      player.setCommandUsed(command, this.roundNumber);
+      this.mapChanges.push(...affected);
+    }
+    return { status: success, message, affected };
   }
 
   serialize(): GameStateSerialized {
@@ -218,12 +216,11 @@ export class GameState {
     return commands.map(command => {
       switch (command) {
         case 'paint':
-          return {
-            command,
-            targets: this.map.getSurroundingColor(player.color).map(p => ({ x: p.x, y: p.y }))
-          }
+        // return {
+        //   command,
+        //   targets: this.map.getSurroundingColor(player.color).map(p => ({ x: p.x, y: p.y }))
+        // }
         case 'bomb':
-        case 'splat':
         case 'eat':
         case 'expand':
           return {
@@ -234,6 +231,10 @@ export class GameState {
           return undefined;
       }
     }).filter(Boolean) as Command[];
+  }
+
+  getMap() {
+    return this.map
   }
 };
 

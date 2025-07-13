@@ -10,7 +10,6 @@ export class Player {
     paint: 0,
     bomb: 0,
     expand: 0,
-    splat: 0,
     eat: 0
   }
 

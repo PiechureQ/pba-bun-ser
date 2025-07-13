@@ -3,13 +3,6 @@ export type Target = {
   y: number;
 };
 
-export type CommandName = 'paint' | 'eat' | 'splat' | 'bomb' | 'expand';
-
-export type Command = {
-  command: CommandName;
-  targets: Target[];
-};
-
 export const CommandRules = {
   paint: {
     maxTargets: 1,
@@ -24,13 +17,16 @@ export const CommandRules = {
     size: 16,
     cooldown: 10
   },
-  splat: {
-    maxTargets: 16,
-    cooldown: 30
-  },
   expand: {
     maxTargets: 0,
     cooldown: 50
   },
 } as const
+
+export type CommandName = keyof typeof CommandRules;
+
+export type Command = {
+  command: CommandName;
+  targets: Target[];
+};
 

@@ -1,3 +1,3 @@
 import { gameServer } from "./src/server";
 
-gameServer({ turnTime: 50, width: 200, height: 140 });
+gameServer({ turnTime: 100, width: 36, height: 24 });
